@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 <output_file>"
+    exit 1
+fi
+
+OUTPUT_FILE="$1"
+
+echo "Cleaning build directory..."
+rm -rf build
+mkdir build
+
+echo "Running CMake..."
+cmake -B build
+echo "Building project..."
+cmake --build build
+
+if [ $? -eq 0 ]; then
+    echo "Build successful. Running program..."
+    ./build/main > "$OUTPUT_FILE"
+    echo "Output saved to $OUTPUT_FILE"
+else
+    echo "Build failed. Exiting."
+    exit 1
+fi
+

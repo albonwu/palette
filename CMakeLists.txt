@@ -15,11 +15,5 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_library(vec3 INTERFACE vec3.hpp)
-target_include_directories(vec3 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-
-add_library(color INTERFACE color.hpp)
-target_include_directories(color INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-
 add_executable(main main.cpp)
-target_link_libraries(main PRIVATE vec3 color)
+target_link_libraries(main)
