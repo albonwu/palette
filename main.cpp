@@ -3,23 +3,34 @@
 #include "color.hpp"
 #include "ray.hpp"
 
+bool hit_sphere(const point3& center, double radius, const ray& r) {
+    vec3 origin_center = center - r.origin();
+    auto a = dot(r.direction(), r.direction());
+    auto b = dot((-2 * r.direction()), origin_center);
+    auto c = dot(origin_center, origin_center) - (radius * radius);
+    
+    auto discriminant = b * b - (4 * a * c);
+    return discriminant >= 0;
+}
+
 // return color for a given scene ray
 color ray_color(const ray& r) {
+    if (hit_sphere(point3(0, 0, -1), 0.5, r)) {
+        return color(1, 0, 0);
+    }
     vec3 unit_dir = unit_vector(r.direction());
     auto a = 0.5 * (unit_dir.y() + 1.0);
     return (1.0 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
 }
 
-
 int main() {
     double aspect_ratio = 16.0 / 9.0;
     int image_width = 400;
-    // calculate image height based off aspect ratio, ensuring it is at least 1
     int image_height = int(image_width / aspect_ratio);
     image_height = (image_height < 1) ? 1 : image_height;
 
     // create a simple camera
-    double focal_length = 1.0; // distance between camera and viewport
+    double focal_length = 1.0;              // distance between camera and viewport
     double total_viewpoint_height = 2.0;
     double total_viewpoint_width = total_viewpoint_height * (double(image_width) / image_height);
     point3 camera_center = point3(0, 0, 0);
