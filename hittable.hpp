@@ -1,8 +1,6 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
-#include "ray.hpp"
-
 struct hit_record {
         point3 p;
         vec3 normal;

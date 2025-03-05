@@ -1,31 +1,16 @@
 #include <iostream>
-#include "vec3.hpp"
-#include "color.hpp"
-#include "ray.hpp"
-
-double hit_sphere(const point3& center, double radius, const ray& r) {
-    vec3 origin_center = center - r.origin();
-    auto a = r.direction().length_squared();
-    auto h = dot(r.direction(), origin_center);
-    auto c = origin_center.length_squared() - (radius * radius);
-    
-    auto discriminant = h * h - a * c;
-    if (discriminant < 0) {
-        return -1.0;
-    }
-    else {
-        return (h - std::sqrt(discriminant)) / a;
-    }
-}
+#include "common.hpp"
+#include "hittable.hpp"
+#include "hittable_list.hpp"
+#include "sphere.hpp"
 
 // return color for a given scene ray
-color ray_color(const ray& r) {
-    point3 sphere_center(0, 0, -1);
-    auto hit_point = hit_sphere(sphere_center, 0.5, r);
-    if (hit_point > 0){
-        vec3 n = unit_vector(r.at(hit_point) - sphere_center);
-        return 0.5 * color(n.x() + 1, n.y() + 1, n.z() + 1);
+color ray_color(const ray &r, const Hittable &world) {
+    hit_record rec;
+    if (world.hit(r, 0, infinity, rec)) {
+        return 0.5 * (rec.normal + color(1, 1, 1));
     }
+
     vec3 unit_dir = unit_vector(r.direction());
     auto a = 0.5 * (unit_dir.y() + 1.0);
     return (1.0 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
@@ -37,10 +22,16 @@ int main() {
     int image_height = int(image_width / aspect_ratio);
     image_height = (image_height < 1) ? 1 : image_height;
 
+    HittableList world;
+
+    world.add(make_shared<Sphere>(point3(0, 0, -1), 0.5));
+    world.add(make_shared<Sphere>(point3(0, -100.5, -1), 100));
+
     // create a simple camera
-    double focal_length = 1.0;              // distance between camera and viewport
+    double focal_length = 1.0; // distance between camera and viewport
     double total_viewpoint_height = 2.0;
-    double total_viewpoint_width = total_viewpoint_height * (double(image_width) / image_height);
+    double total_viewpoint_width =
+        total_viewpoint_height * (double(image_width) / image_height);
     point3 camera_center = point3(0, 0, 0);
 
     // calculate vectors spanning viewpoint edges
@@ -52,8 +43,10 @@ int main() {
     vec3 pixel_delta_h = viewpoint_h / image_height;
 
     // calculate the top left pixel location
-    point3 viewpoint_top_left = camera_center - vec3(0, 0, focal_length) - (viewpoint_h / 2) - (viewpoint_w / 2);
-    point3 pixel_00_loc = viewpoint_top_left + 0.5 * (pixel_delta_w + pixel_delta_h);
+    point3 viewpoint_top_left = camera_center - vec3(0, 0, focal_length) -
+                                (viewpoint_h / 2) - (viewpoint_w / 2);
+    point3 pixel_00_loc =
+        viewpoint_top_left + 0.5 * (pixel_delta_w + pixel_delta_h);
 
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
@@ -61,14 +54,14 @@ int main() {
         std::clog << "\rScanlines remaining: " << (image_height - j) << ' '
                   << std::flush;
         for (int i = 0; i < image_width; i++) {
-            auto pixel_center = pixel_00_loc + (i * pixel_delta_w) + (j * pixel_delta_h);
-            auto ray_dir = pixel_center - camera_center; 
+            auto pixel_center =
+                pixel_00_loc + (i * pixel_delta_w) + (j * pixel_delta_h);
+            auto ray_dir = pixel_center - camera_center;
             ray r(camera_center, ray_dir);
-            color pixel_color = ray_color(r);
+            color pixel_color = ray_color(r, world);
             write_color(std::cout, pixel_color);
         }
     }
 
     std::clog << "\rDone.\n";
-
 }
