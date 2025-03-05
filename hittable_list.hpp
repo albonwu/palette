@@ -1,6 +1,7 @@
 #ifndef HITTABLE_LIST_H
 #define HITTABLE_LIST_H
 
+#include "common.hpp"
 #include "hittable.hpp"
 
 #include <memory>
@@ -28,14 +29,14 @@ class HittableList : public Hittable {
             objects.push_back(object);
         }
 
-        bool hit(const ray &r, double ray_tmin, double ray_tmax,
-                 hit_record &rec) const override {
+        bool hit(const ray &r, Interval ray_t, hit_record &rec) const override {
             hit_record temp_rec;
             bool any_hits = false;
-            auto closest_so_far = ray_tmax;
+            auto closest_so_far = ray_t.max;
 
             for (const auto &object : objects) {
-                if (object->hit(r, ray_tmin, closest_so_far, temp_rec)) {
+                if (object->hit(r, Interval(ray_t.min, closest_so_far),
+                                temp_rec)) {
                     any_hits = true;
                     closest_so_far = temp_rec.t;
                     rec = temp_rec;

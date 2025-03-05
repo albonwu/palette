@@ -5,20 +5,22 @@
 
 class ray {
     public:
-        ray() {}
-
-        ray(const point3& origin, const vec3& direction) : orig(origin), dir(direction) {
+        ray() {
         }
 
-        const point3& origin() const {
+        ray(const point3 &origin, const Vec3 &direction)
+            : orig(origin), dir(direction) {
+        }
+
+        const point3 &origin() const {
             return orig;
         }
-        const vec3& direction() const {
+        const Vec3 &direction() const {
             return dir;
         }
 
         /**
-         * Returns the 3d point the ray points to for a given t 
+         * Returns the 3d point the ray points to for a given t
          */
         point3 at(double t) const {
             return orig + (t * dir);
@@ -26,7 +28,7 @@ class ray {
 
     private:
         point3 orig;
-        vec3 dir;        
+        Vec3 dir;
 };
 
 #endif

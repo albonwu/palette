@@ -1,13 +1,18 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
+// #include "common.hpp"
+#include "ray.hpp"
+#include "vec3.hpp"
+#include "interval.hpp"
+
 struct hit_record {
         point3 p;
-        vec3 normal;
+        Vec3 normal;
         double t;
         bool front_face;
 
-        void set_face_normal(const ray &r, const vec3 &outward_normal) {
+        void set_face_normal(const ray &r, const Vec3 &outward_normal) {
             front_face = dot(r.direction(), outward_normal) < 0;
             normal = front_face ? outward_normal : -outward_normal;
         }
@@ -15,7 +20,7 @@ struct hit_record {
 
 class Hittable {
     public:
-        virtual bool hit(const ray &r, double ray_tmin, double ray_tmax,
+        virtual bool hit(const ray &r, Interval ray_t,
                          hit_record &record) const = 0;
 
         virtual ~Hittable() = default;

@@ -16,8 +16,7 @@ inline double degrees_to_radians(double degrees) {
     return degrees * pi / 180.0;
 }
 
-#include "color.hpp"
-#include "ray.hpp"
-#include "vec3.hpp"
+// See below on implicit header inclusion:
+// https://softwareengineering.stackexchange.com/a/262020
 
 #endif
