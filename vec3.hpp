@@ -60,6 +60,16 @@ class Vec3 {
         double length_squared() const {
             return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
         }
+
+        static Vec3 random() {
+            return Vec3(random_double(), random_double(), random_double());
+        }
+
+        static Vec3 random(double min, double max) {
+            return Vec3(random_double(min, max), 
+                        random_double(min, max), 
+                        random_double(min, max));
+        }
 };
 
 using point3 = Vec3;
@@ -105,6 +115,27 @@ inline Vec3 cross(const Vec3 &u, const Vec3 &v) {
 
 inline Vec3 unit_vector(const Vec3 &v) {
     return v / v.length();
+}
+
+inline Vec3 random_unit_vector() {
+    while (true) {
+        auto p = Vec3::random(-1, 1);
+        auto len_sq = p.length_squared();
+        // filter out any values that may cause floating point 
+        // precision errors or are outside the circle
+        if (1e-160 < len_sq && len_sq <= 1) {
+            return p / sqrt(len_sq);
+        }
+    }
+}
+
+inline Vec3 random_on_hemisphere(const Vec3& normal) {
+    Vec3 on_unit_circle = random_unit_vector();
+    // if on the same hemisphere, return self. Otherwise invert.
+    if (dot(on_unit_circle, normal) > 0.0) {
+        return on_unit_circle;
+    }
+    return -on_unit_circle;
 }
 
 #endif
