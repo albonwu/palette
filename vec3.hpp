@@ -64,7 +64,8 @@ class Vec3 {
         // returns true if the vector is close to zero in all dimensions
         bool near_zero() const {
             auto s = 1e-8;
-            return (std::fabs(e[0]) < s) && (std::fabs(e[1]) < s) && (std::fabs(e[2]) < s);
+            return (std::fabs(e[0]) < s) && (std::fabs(e[1]) < s) &&
+                   (std::fabs(e[2]) < s);
         }
 
         static Vec3 random() {
@@ -72,8 +73,7 @@ class Vec3 {
         }
 
         static Vec3 random(double min, double max) {
-            return Vec3(random_double(min, max), 
-                        random_double(min, max), 
+            return Vec3(random_double(min, max), random_double(min, max),
                         random_double(min, max));
         }
 };
@@ -127,7 +127,7 @@ inline Vec3 random_unit_vector() {
     while (true) {
         auto p = Vec3::random(-1, 1);
         auto len_sq = p.length_squared();
-        // filter out any values that may cause floating point 
+        // filter out any values that may cause floating point
         // precision errors or are outside the circle
         if (1e-160 < len_sq && len_sq <= 1) {
             return p / sqrt(len_sq);
@@ -135,7 +135,7 @@ inline Vec3 random_unit_vector() {
     }
 }
 
-inline Vec3 random_on_hemisphere(const Vec3& normal) {
+inline Vec3 random_on_hemisphere(const Vec3 &normal) {
     Vec3 on_unit_circle = random_unit_vector();
     // if on the same hemisphere, return self. Otherwise invert.
     if (dot(on_unit_circle, normal) > 0.0) {
@@ -144,8 +144,16 @@ inline Vec3 random_on_hemisphere(const Vec3& normal) {
     return -on_unit_circle;
 }
 
-inline Vec3 reflect(const Vec3& v, const Vec3& n) {
+inline Vec3 reflect(const Vec3 &v, const Vec3 &n) {
     return v - (2 * dot(v, n) * n);
+}
+
+inline Vec3 refract(const Vec3 &uv, const Vec3 &n, double eta_ratio) {
+    auto cos_theta = std::fmin(dot(-uv, n), 1.0);
+    Vec3 r_out_perp = eta_ratio * (uv + cos_theta * n);
+    Vec3 r_out_parallel =
+        -std::sqrt(std::fabs(1.0 - r_out_perp.length_squared())) * n;
+    return r_out_perp + r_out_parallel;
 }
 
 #endif
