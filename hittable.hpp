@@ -6,9 +6,12 @@
 #include "vec3.hpp"
 #include "interval.hpp"
 
+class Material;
+
 struct hit_record {
         point3 p;
         Vec3 normal;
+        shared_ptr<Material> mat;
         double t;
         bool front_face;
 

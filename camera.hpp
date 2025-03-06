@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include "hittable.hpp"
+#include "material.hpp"
 #include "color.hpp"
 #include "vec3.hpp"
 
@@ -103,8 +104,12 @@ class Camera {
 
             // ignore floating point error hits
             if (world.hit(r, Interval(0.001, infinity), rec)) {
-                Vec3 direction = rec.normal + random_on_hemisphere(rec.normal);
-                return 0.7 * ray_color(Ray(rec.p, direction), depth - 1, world);
+                Ray scattered;
+                Color attenuation;
+                if (rec.mat->scatter(r, rec, attenuation, scattered)) {
+                    return attenuation * ray_color(scattered, depth - 1, world);
+                }
+                return Color(0, 0, 0);
             }
 
             Vec3 unit_direction = unit_vector(r.direction());
