@@ -7,18 +7,6 @@
 #include "sphere.hpp"
 #include "color.hpp"
 
-// return color for a given scene ray
-Color ray_color(const Ray &r, const Hittable &world) {
-    hit_record rec;
-    if (world.hit(r, Interval(0, infinity), rec)) {
-        return 0.5 * (rec.normal + Color(1, 1, 1));
-    }
-
-    Vec3 unit_dir = unit_vector(r.direction());
-    auto a = 0.5 * (unit_dir.y() + 1.0);
-    return (1.0 - a) * Color(1.0, 1.0, 1.0) + a * Color(0.5, 0.7, 1.0);
-}
-
 int main() {
     HittableList world;
 
