@@ -8,7 +8,7 @@
 #include "color.hpp"
 
 // return color for a given scene ray
-Color ray_color(const ray &r, const Hittable &world) {
+Color ray_color(const Ray &r, const Hittable &world) {
     hit_record rec;
     if (world.hit(r, Interval(0, infinity), rec)) {
         return 0.5 * (rec.normal + Color(1, 1, 1));

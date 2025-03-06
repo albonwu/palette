@@ -3,12 +3,12 @@
 
 #include "vec3.hpp"
 
-class ray {
+class Ray {
     public:
-        ray() {
+        Ray() {
         }
 
-        ray(const point3 &origin, const Vec3 &direction)
+        Ray(const point3 &origin, const Vec3 &direction)
             : orig(origin), dir(direction) {
         }
 

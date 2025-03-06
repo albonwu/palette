@@ -23,7 +23,7 @@ class Camera {
                 for (int i = 0; i < image_width; i++) {
                     Color pixel_color(0, 0, 0);
                     for (int sample = 0; sample < samples_per_pixel; sample++) {
-                        ray r = get_ray(i, j);
+                        Ray r = get_ray(i, j);
                         pixel_color += ray_color(r, world);
                     }
                     write_color(std::cout, pixel_samples_scale * pixel_color);
@@ -72,7 +72,7 @@ class Camera {
                 viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
         }
 
-        ray get_ray(int i, int j) const {
+        Ray get_ray(int i, int j) const {
             // Construct a camera ray originating from the origin and directed at randomly sampled
             // point around the pixel location i, j.
 
@@ -84,7 +84,7 @@ class Camera {
             auto ray_origin = center;
             auto ray_direction = pixel_sample - ray_origin;
 
-            return ray(ray_origin, ray_direction);
+            return Ray(ray_origin, ray_direction);
         }
 
         Vec3 sample_square() const {
@@ -92,7 +92,7 @@ class Camera {
             return Vec3(random_double() - 0.5, random_double() - 0.5, 0);
         }
 
-        Color ray_color(const ray &r, const Hittable &world) const {
+        Color ray_color(const Ray &r, const Hittable &world) const {
             hit_record rec;
 
             if (world.hit(r, Interval(0, infinity), rec)) {

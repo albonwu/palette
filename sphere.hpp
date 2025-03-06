@@ -20,7 +20,7 @@ class Sphere : public Hittable {
             : center(center), radius(std::fmax(0, radius)) {
         }
 
-        bool hit(const ray &r, Interval ray_t, hit_record &rec) const override {
+        bool hit(const Ray &r, Interval ray_t, hit_record &rec) const override {
             Vec3 origin_center = center - r.origin();
             auto a = r.direction().length_squared();
             auto h = dot(r.direction(), origin_center);

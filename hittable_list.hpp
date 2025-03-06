@@ -29,7 +29,7 @@ class HittableList : public Hittable {
             objects.push_back(object);
         }
 
-        bool hit(const ray &r, Interval ray_t, hit_record &rec) const override {
+        bool hit(const Ray &r, Interval ray_t, hit_record &rec) const override {
             hit_record temp_rec;
             bool any_hits = false;
             auto closest_so_far = ray_t.max;
