@@ -11,7 +11,7 @@ bool in_range(double root, double min, double max) {
 
 class Sphere : public Hittable {
     private:
-        point3 center;
+        Point3 center;
         double radius;
         shared_ptr<Material> mat;
 

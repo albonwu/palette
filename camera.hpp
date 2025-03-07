@@ -13,6 +13,14 @@ class Camera {
         int samples_per_pixel = 10;
         int max_depth = 10;
 
+        double vfov = 90;
+        Point3 lookfrom = Point3(0, 0, 0);
+        Point3 lookat = Point3(0, 0, -1);
+        Vec3 vup = Vec3(0, 1, 0);
+
+        double defocus_angle = 0;
+        double focus_dist = 10;
+
         void render(const Hittable &world) {
             initialize();
 
@@ -38,10 +46,13 @@ class Camera {
     private:
         int image_height;
         double pixel_samples_scale;
-        point3 center;
-        point3 pixel_00_loc; // Location of pixel 0, 0
+        Point3 center;
+        Point3 pixel_00_loc; // Location of pixel 0, 0
         Vec3 pixel_delta_u;  // Horizontal pixel offset vector
         Vec3 pixel_delta_v;  // Vertical pixel offset vector
+        Vec3 u, v, w;        // Orthonormal basis for camera frame
+        Vec3 defocus_disk_u;
+        Vec3 defocus_disk_v;
 
         void initialize() {
             image_height = int(image_width / aspect_ratio);
@@ -49,24 +60,35 @@ class Camera {
 
             pixel_samples_scale = 1.0 / samples_per_pixel;
 
-            center = point3(0, 0, 0);
+            center = lookfrom;
 
-            auto focal_length = 1.0;
-            auto viewport_height = 2.0;
+            auto focal_length = (lookfrom - lookat).length();
+            auto theta = degrees_to_radians(vfov);
+            auto h = std::tan(theta / 2);
+            auto viewport_height = 2 * h * focus_dist;
             auto viewport_width =
                 viewport_height * (double(image_width) / image_height);
 
-            auto viewport_u = Vec3(viewport_width, 0, 0);
-            auto viewport_v = Vec3(0, -viewport_height, 0);
+            w = unit_vector(lookfrom - lookat);
+            u = unit_vector(cross(vup, w));
+            v = cross(w, u);
+
+            Vec3 viewport_u = viewport_width * u;
+            Vec3 viewport_v = viewport_height * -v;
 
             // Scale offset according to viewport
             pixel_delta_u = viewport_u / image_width;
             pixel_delta_v = viewport_v / image_height;
 
-            auto viewport_upper_left = center - Vec3(0, 0, focal_length) -
-                                       viewport_u / 2 - viewport_v / 2;
+            auto viewport_upper_left =
+                center - (focus_dist * w) - viewport_u / 2 - viewport_v / 2;
             pixel_00_loc =
                 viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
+
+            auto defocus_radius =
+                focus_dist * std::tan(degrees_to_radians(defocus_angle / 2));
+            defocus_disk_u = u * defocus_radius;
+            defocus_disk_v = v * defocus_radius;
         }
 
         // Compute ray using location of pixel 0, 0 and antialiasing
@@ -76,7 +98,8 @@ class Camera {
                                 ((i + offset.x()) * pixel_delta_u) +
                                 ((j + offset.y()) * pixel_delta_v);
 
-            auto ray_origin = center;
+            auto ray_origin =
+                (defocus_angle <= 0) ? center : defocus_disk_sample();
             auto ray_direction = pixel_sample - ray_origin;
 
             return Ray(ray_origin, ray_direction);
@@ -84,6 +107,12 @@ class Camera {
 
         Vec3 sample_square() const {
             return Vec3(random_double() - 0.5, random_double() - 0.5, 0);
+        }
+
+        Point3 defocus_disk_sample() const {
+            // Returns a random point in the camera defocus disk.
+            auto p = random_in_unit_disk();
+            return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
         }
 
         Color ray_color(const Ray &r, int depth, const Hittable &world) const {
